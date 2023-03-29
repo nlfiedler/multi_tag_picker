@@ -1,5 +1,5 @@
 name: flutter_tagging_demo
-description: A Demo Application of Flutter Tagging.
+description: A demo application of multi-tag picker.
 publish_to: none
 version: 1.0.1
 
@@ -10,17 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_tagging_plus:
+  multi_tag_picker:
     path: ../
   flutter_syntax_view: ^4.0.0
-
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
 flutter:
-
   uses-material-design: true
-
