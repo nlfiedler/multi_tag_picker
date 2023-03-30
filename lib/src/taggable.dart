@@ -1,7 +1,6 @@
-// Copyright 2020 Sarbagya Dhaubanjar. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+//
+// Copyright 2020 Sarbagya Dhaubanjar
+//
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
@@ -50,11 +49,10 @@ abstract class Taggable {
 ///
 /// [TaggableMixin] does the override of the `==` operator as well as `hashCode`.
 mixin TaggableMixin implements Taggable {
-  /// The [List] of `props` (properties) which will be used to determine whether
-  /// two [Taggables] are equal.
+  @override
   List<Object> get props;
 
-  /// If true, string comparison will be case sensitive.
+  @override
   bool get caseSensitive => false;
 
   @override
@@ -100,8 +98,7 @@ const DeepCollectionEquality _equality = DeepCollectionEquality();
 
 bool _equals(List list1, List list2, bool caseSensitive) {
   if (identical(list1, list2)) return true;
-  // if (list1 == null || list2 == null) return false;
-  var length = list1.length;
+  final length = list1.length;
   if (length != list2.length) return false;
 
   for (var i = 0; i < length; i++) {

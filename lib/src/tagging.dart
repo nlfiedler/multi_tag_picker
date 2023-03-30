@@ -1,7 +1,6 @@
-// Copyright 2020 Sarbagya Dhaubanjar. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+//
+// Copyright 2020 Sarbagya Dhaubanjar
+//
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -12,9 +11,8 @@ import 'taggable.dart';
 
 ///
 class FlutterTagging<T extends Taggable> extends StatefulWidget {
-  /// Called every time the value changes.
-  ///  i.e. when items are selected or removed.
-  final VoidCallback? onChanged;
+  /// Invoked any time values are added or removed.
+  final ValueChanged<List<T>> onChanged;
 
   /// The configuration of the [TextField] that the [FlutterTagging] widget displays.
   final TextFieldConfiguration textFieldConfiguration;
@@ -46,14 +44,15 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// The configuration of selected tags like their spacing, direction, etc.
   final WrapConfiguration wrapConfiguration;
 
-  /// Defines an object for search pattern.
+  /// Defines a new value given the provided query string.
   ///
-  /// If null, tag addition feature is disabled.
+  /// If null, the tag addition feature is disabled.
   final T Function(String)? additionCallback;
 
-  /// Called when add to tag button is pressed.
+  /// Called when a new tag is being added by the user.
   ///
-  /// Api Calls to add the tag can be called here.
+  /// Optionally may return a refined version of the value to be added to the
+  /// list of values.
   final FutureOr<T> Function(T)? onAdded;
 
   /// Called when waiting for [findSuggestions] to return.
@@ -75,6 +74,9 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
 
   /// The configuration of suggestion box.
   final SuggestionsBoxConfiguration suggestionsBoxConfiguration;
+
+  /// Spacing between the text field and the row of input chips.
+  final double interiorSpacing;
 
   /// The duration that [transitionBuilder] animation takes.
   ///
@@ -129,16 +131,17 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// Defaults to false.
   final bool enableImmediateSuggestion;
 
-  ///
+  /// List of inital values, if any.
   final List<T> initialItems;
 
   /// Creates a [FlutterTagging] widget.
-  FlutterTagging({
-    required this.initialItems,
+  const FlutterTagging({
+    Key? key,
     required this.findSuggestions,
     required this.configureChip,
     required this.configureSuggestion,
-    this.onChanged,
+    required this.onChanged,
+    this.initialItems = const [],
     this.additionCallback,
     this.enableImmediateSuggestion = false,
     this.errorBuilder,
@@ -147,6 +150,7 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
     this.wrapConfiguration = const WrapConfiguration(),
     this.textFieldConfiguration = const TextFieldConfiguration(),
     this.suggestionsBoxConfiguration = const SuggestionsBoxConfiguration(),
+    this.interiorSpacing = 8.0,
     this.transitionBuilder,
     this.debounceDuration = const Duration(milliseconds: 300),
     this.hideOnEmpty = false,
@@ -155,21 +159,23 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
     this.animationDuration = const Duration(milliseconds: 500),
     this.animationStart = 0.25,
     this.onAdded,
-  });
+  }) : super(key: key);
 
   @override
-  _FlutterTaggingState<T> createState() => _FlutterTaggingState<T>();
+  State<FlutterTagging<T>> createState() => _FlutterTaggingState<T>();
 }
 
 class _FlutterTaggingState<T extends Taggable>
     extends State<FlutterTagging<T>> {
   late final TextEditingController _textController;
   late final FocusNode _focusNode;
+  final Set<T> _values = <T>{};
   T? _additionItem;
 
   @override
   void initState() {
     super.initState();
+    _values.addAll(widget.initialItems);
     _textController =
         widget.textFieldConfiguration.controller ?? TextEditingController();
     _focusNode = widget.textFieldConfiguration.focusNode ?? FocusNode();
@@ -215,7 +221,7 @@ class _FlutterTaggingState<T extends Taggable>
           transitionBuilder: widget.transitionBuilder,
           loadingBuilder: (context) =>
               widget.loadingBuilder?.call(context) ??
-              SizedBox(
+              const SizedBox(
                 height: 3.0,
                 child: LinearProgressIndicator(),
               ),
@@ -226,12 +232,13 @@ class _FlutterTaggingState<T extends Taggable>
             enabled: widget.textFieldConfiguration.enabled,
           ),
           suggestionsCallback: (query) async {
-            final suggestions = await widget.findSuggestions(query);
-            suggestions.removeWhere(widget.initialItems.contains);
+            var suggestions = await widget.findSuggestions(query);
+            suggestions =
+                suggestions.where((r) => !_values.contains(r)).toList();
             if (widget.additionCallback != null && query.isNotEmpty) {
               final additionItem = widget.additionCallback!(query);
               if (!suggestions.contains(additionItem) &&
-                  !widget.initialItems.contains(additionItem)) {
+                  !_values.contains(additionItem)) {
                 _additionItem = additionItem;
                 suggestions.insert(0, additionItem);
               } else {
@@ -251,23 +258,21 @@ class _FlutterTaggingState<T extends Taggable>
                 splashColor: conf.splashColor ?? Theme.of(context).splashColor,
                 borderRadius: conf.splashRadius,
                 onTap: () async {
-                  if (widget.onAdded != null) {
-                    final _item = await widget.onAdded!(item);
-                    widget.initialItems.add(_item);
-                  } else {
-                    widget.initialItems.add(item);
-                  }
-                  setState(() {});
-                  widget.onChanged?.call();
+                  final itemItem = widget.onAdded != null
+                      ? await widget.onAdded!(item)
+                      : item;
+                  setState(() {
+                    _values.add(itemItem);
+                  });
+                  widget.onChanged.call(_values.toList(growable: false));
                   _textController.clear();
-                  _focusNode.unfocus();
                 },
                 child: Builder(
                   builder: (context) {
                     if (conf.additionWidget != null && _additionItem == item) {
                       return conf.additionWidget!;
                     } else {
-                      return SizedBox(width: 0);
+                      return const SizedBox(width: 0);
                     }
                   },
                 ),
@@ -276,13 +281,20 @@ class _FlutterTaggingState<T extends Taggable>
           },
           onSuggestionSelected: (suggestion) {
             if (_additionItem != suggestion) {
-              widget.initialItems.add(suggestion);
-              setState(() {});
-              widget.onChanged?.call();
+              setState(() {
+                _values.add(suggestion);
+              });
+              widget.onChanged.call(_values.toList(growable: false));
               _textController.clear();
+              // focus change must happen after this task completes
+              Future.delayed(Duration.zero, () {
+                _focusNode.requestFocus();
+              });
             }
           },
         ),
+        if (widget.interiorSpacing > 0)
+          SizedBox(height: widget.interiorSpacing),
         Wrap(
           alignment: widget.wrapConfiguration.alignment,
           crossAxisAlignment: widget.wrapConfiguration.crossAxisAlignment,
@@ -292,7 +304,7 @@ class _FlutterTaggingState<T extends Taggable>
           direction: widget.wrapConfiguration.direction,
           textDirection: widget.wrapConfiguration.textDirection,
           verticalDirection: widget.wrapConfiguration.verticalDirection,
-          children: widget.initialItems.map<Widget>((item) {
+          children: _values.map<Widget>((item) {
             final conf = widget.configureChip(item);
             return Chip(
               label: conf.label,
@@ -310,9 +322,10 @@ class _FlutterTaggingState<T extends Taggable>
               padding: conf.padding,
               shadowColor: conf.shadowColor,
               onDeleted: () {
-                widget.initialItems.remove(item);
-                setState(() {});
-                widget.onChanged?.call();
+                setState(() {
+                  _values.remove(item);
+                });
+                widget.onChanged.call(_values.toList(growable: false));
               },
             );
           }).toList(),

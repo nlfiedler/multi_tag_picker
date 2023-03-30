@@ -4,64 +4,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:multi_tag_picker/multi_tag_picker.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
-///
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Tagging Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.white,
-      ),
+    return const MaterialApp(
+      title: 'MultiPicker Demo',
       home: MyHomePage(),
     );
   }
 }
 
-///
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _selectedValuesJson = 'Nothing to show';
-  late List<Language> _selectedLanguages;
-
-  @override
-  void initState() {
-    _selectedLanguages = [];
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _selectedLanguages.clear();
-    super.dispose();
-  }
+  String _selectedValuesJson = 'are yet to be found...';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter Tagging Demo'),
+        title: const Text('MultiPicker Demo'),
       ),
       body: Column(
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FlutterTagging<Language>(
-              initialItems: _selectedLanguages,
-              textFieldConfiguration: TextFieldConfiguration(
+              textFieldConfiguration: const TextFieldConfiguration(
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   filled: true,
-                  fillColor: Colors.green.withAlpha(30),
-                  hintText: 'Search Tags',
+                  hintText: 'Enter a query',
                   labelText: 'Select Tags',
                 ),
               ),
@@ -72,58 +54,58 @@ class _MyHomePageState extends State<MyHomePage> {
                   position: 0,
                 );
               },
-              onAdded: (language) {
-                // api calls here, triggered when add to tag button is pressed
-                return Language(name: language.name, position: -1);
-              },
               configureSuggestion: (lang) {
                 return SuggestionConfiguration(
                   title: Text(lang.name),
                   subtitle: Text(lang.position.toString()),
-                  additionWidget: Chip(
+                  additionWidget: const Chip(
                     avatar: Icon(
                       Icons.add_circle,
-                      color: Colors.white,
                     ),
                     label: Text('Add New Tag'),
-                    labelStyle: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w300,
-                    ),
-                    backgroundColor: Colors.green,
                   ),
                 );
               },
               configureChip: (lang) {
                 return ChipConfiguration(
                   label: Text(lang.name),
-                  backgroundColor: Colors.green,
-                  labelStyle: TextStyle(color: Colors.white),
-                  deleteIconColor: Colors.white,
                 );
               },
-              onChanged: () {
+              onChanged: (values) {
                 setState(() {
-                  _selectedValuesJson = _selectedLanguages
-                      .map<String>((lang) => '\n${lang.toJson()}')
-                      .toList()
-                      .toString();
-                  _selectedValuesJson =
-                      _selectedValuesJson.replaceFirst('}]', '}\n]');
+                  if (values.isEmpty) {
+                    _selectedValuesJson = 'have left us...';
+                  } else {
+                    _selectedValuesJson = values
+                        .map<String>((lang) => '\n${lang.toJson()}')
+                        .toList()
+                        .toString()
+                        .replaceFirst('}]', '}\n]');
+                  }
                 });
               },
             ),
           ),
-          SizedBox(
-            height: 20.0,
+          const Text(
+            'The Chosen',
+            style: TextStyle(fontSize: 18.0),
           ),
           Expanded(
-            child: SyntaxView(
-              code: _selectedValuesJson,
-              syntax: Syntax.JAVASCRIPT,
-              withLinesCount: false,
-              syntaxTheme: SyntaxTheme.standard(),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1.0),
+                ),
+                child: SyntaxView(
+                  code: _selectedValuesJson,
+                  syntax: Syntax.JAVASCRIPT,
+                  fontSize: 16.0,
+                  expanded: true,
+                  withLinesCount: false,
+                  syntaxTheme: SyntaxTheme.standard(),
+                ),
+              ),
             ),
           ),
         ],
@@ -134,29 +116,37 @@ class _MyHomePageState extends State<MyHomePage> {
 
 /// Mocks fetching language from network API with delay of 500ms.
 Future<List<Language>> getLanguages(String query) async {
-  await Future.delayed(Duration(milliseconds: 500), null);
-  return <Language>[
-    Language(name: 'JavaScript', position: 1),
-    Language(name: 'Python', position: 2),
-    Language(name: 'Java', position: 3),
-    Language(name: 'PHP', position: 4),
-    Language(name: 'C#', position: 5),
-    Language(name: 'C++', position: 6),
+  if (query.isEmpty) {
+    return const [];
+  }
+  await Future.delayed(const Duration(milliseconds: 500), null);
+  final lowercaseQuery = query.toLowerCase();
+  return const <Language>[
+    Language(name: 'Rust', position: 1),
+    Language(name: 'Dart', position: 2),
+    Language(name: 'Scheme', position: 3),
+    Language(name: 'Java', position: 8),
+    Language(name: 'C#', position: 9),
+    Language(name: 'JavaScript', position: 10),
+    Language(name: 'APL', position: 11),
+    Language(name: 'Python', position: 12),
+    Language(name: 'C++', position: 24),
+    Language(name: 'PHP', position: 48),
   ]
-      .where((lang) => lang.name.toLowerCase().contains(query.toLowerCase()))
-      .toList();
+      .where((lang) => lang.name.toLowerCase().contains(lowercaseQuery))
+      .toList(growable: false)
+    ..sort((a, b) => a.name
+        .toLowerCase()
+        .indexOf(lowercaseQuery)
+        .compareTo(b.name.toLowerCase().indexOf(lowercaseQuery)));
 }
 
-/// Language Class
+/// Language represents a programming language.
 class Language extends Taggable {
-  ///
   final String name;
-
-  ///
   final int position;
 
-  /// Creates Language
-  Language({
+  const Language({
     required this.name,
     required this.position,
   });
@@ -164,7 +154,6 @@ class Language extends Taggable {
   @override
   List<Object> get props => [name];
 
-  /// Converts the class to json string.
   String toJson() => '''  {
     "name": $name,\n
     "position": $position\n
