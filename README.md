@@ -1,120 +1,48 @@
-# Flutter Tagging Plus
+# Multi-Tag Picker
 
-Forked from https://github.com/culjo/flutter_tagging as it seems abandoned.
+Flutter library that combines the text field from `flutter_typeahead` with a row of input chips, allowing the user to select from a list of suggestions, as well as creating new values. Similar to `choose_input_chips` except that this widget provides the ability to create new values.
 
-Based on https://github.com/sarbagyastha/flutter_tagging/
+## Usage
 
+### Install
 
+Edit your package's `pubspec.yaml` like so and then run `flutter pub get`:
 
-# Details
+```
+dependencies:
+  multi_tag_picker: ^1.0.0
+```
 
-
-A flutter package with tagging or multi-select functionality. 
-Useful for adding Tag or Label Selection Forms.
-
-![DEMO](flutter_tagging.gif) 
+### Import
 
 ```dart
-List<Language> _selectedLanguages = [];
-
-FlutterTagging<Language>(
-    initialItems: _selectedLanguages,
-    textFieldConfiguration: TextFieldConfiguration(
-        decoration: InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: Colors.green.withAlpha(30),
-            hintText: 'Search Tags',
-            labelText: 'Select Tags',
-        ),
-    ),
-    findSuggestions: LanguageService.getLanguages,
-    additionCallback: (value) {
-        return Language(
-                name: value,
-                position: 0,
-        );
-    },
-    onAdded: (language){
-      // api calls here, triggered when add to tag button is pressed
-        return Language();
-    },
-    configureSuggestion: (lang) {
-        return SuggestionConfiguration(
-            title: Text(lang.name),
-            subtitle: Text(lang.position.toString()),
-            additionWidget: Chip(
-                avatar: Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
-                ),
-                label: Text('Add New Tag'),
-                labelStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w300,
-                ),
-                backgroundColor: Colors.green,
-            ),
-        );
-    },
-    configureChip: (lang) {
-        return ChipConfiguration(
-            label: Text(lang.name),
-            backgroundColor: Colors.green,
-            labelStyle: TextStyle(color: Colors.white),
-            deleteIconColor: Colors.white,
-        );
-    },
-    onChanged: () {
-      print();
-    }
-);
-
-/// LanguageService
-class LanguageService {
-    /// Mocks fetching language from network API with delay of 500ms.
-    static Future<List<Language>> getLanguages(String query) async {
-          await Future.delayed(Duration(milliseconds: 500), null);
-          return <Language>[
-            Language(name: 'JavaScript', position: 1),
-            Language(name: 'Python', position: 2),
-            Language(name: 'Java', position: 3),
-            Language(name: 'PHP', position: 4),
-            Language(name: 'C#', position: 5),
-            Language(name: 'C++', position: 6),
-          ].where((lang) => lang.name.toLowerCase().contains(query.toLowerCase())).toList();
-    }
-}
+import 'package:multi_tag_picker/multi_tag_picker.dart';
 ```
 
+### Example
 
-## License
+See the code in `example/lib/main.dart` for a full-fledged working example.
 
-```
-Copyright 2020 Sarbagya Dhaubanjar. All rights reserved.
+## Similar Projects
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+The libraries shown below offer form input fields that have something to do with input chips. They may be quite different from this library, and that is kind of the point. This library is not meant to be an end-all-be-all to your input chip needs, so one of these may offer what you're looking for.
 
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+* [awesome_select](https://pub.dev/packages/awesome_select): offers many types of form inputs.
+* [chips_choice](https://pub.dev/packages/chips_choice): provides selection of one or more chips.
+* [flutter_input_chips](https://pub.dev/packages/flutter_input_chips): text input with free-form creation of new chips.
+* [choose_input_chips](https://pub.dev/packages/choose_input_chips): similar to this but the chips are aligned horizontally next to a `Text` and a cursor that simulates editing.
+* [simple_chips_input](https://pub.dev/packages/simple_chips_input): text input field with free-form creation of new chips, with optional input validation.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
+## How to Contribute
+
+Pull requests are welcome. In order to expedite your contributions, please keep the following suggestions in mind. Thank you.
+
+1. Submit small changes one at a time.
+1. Keep bug fixes separate from unrelated changes.
+1. If you want to reformat the code, do so in a separate commit.
+1. If you want to make a lot of changes to bring the code up to date with the latest Dart or Flutter features (such as nullability), do so in a separate commit.
+1. Use these [guidelines](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html) when writing git commit messages. Bonus points for following the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) convention.
+
+## History
+
+Started as [sarbagyastha/flutter_tagging/](https://github.com/sarbagyastha/flutter_tagging/) and later forked to [culjo/flutter_tagging](https://github.com/culjo/flutter_tagging) and then forked again to [bradintheusa/flutter_tagging_plus](https://github.com/bradintheusa/flutter_tagging_plus) before coming to live here. Wanted to have a source repository that allowed for filing issues.
