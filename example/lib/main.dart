@@ -66,6 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 );
               },
+              placeholderItem: const Language(
+                name: 'dummy',
+                position: 0,
+              ),
               configureChip: (lang) {
                 return ChipConfiguration(
                   label: Text(lang.name),

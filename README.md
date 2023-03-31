@@ -1,6 +1,6 @@
 # Multi-Tag Picker
 
-Flutter library that combines the text field from `flutter_typeahead` with a row of input chips, allowing the user to select from a list of suggestions, as well as creating new values. Similar to `choose_input_chips` except that this widget provides the ability to create new values.
+Flutter library that combines the text field from `flutter_typeahead` with a row of chips, allowing the user to select from a list of suggestions, as well as creating new values. Similar to `choose_input_chips` except that this widget provides the ability to create new values.
 
 ## Usage
 
@@ -25,7 +25,7 @@ See the code in `example/lib/main.dart` for a full-fledged working example.
 
 ## Similar Projects
 
-The libraries shown below offer form input fields that have something to do with input chips. They may be quite different from this library, and that is kind of the point. This library is not meant to be an end-all-be-all to your input chip needs, so one of these may offer what you're looking for.
+The libraries shown below offer form input fields that have something to do with (input) chips. They may be quite different from this library, and that is kind of the point. This library is not meant to be an end-all-be-all to your (input) chip needs, so one of these may offer what you're looking for.
 
 * [awesome_select](https://pub.dev/packages/awesome_select): offers many types of form inputs.
 * [chips_choice](https://pub.dev/packages/chips_choice): provides selection of one or more chips.

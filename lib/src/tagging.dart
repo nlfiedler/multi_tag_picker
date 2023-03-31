@@ -9,36 +9,30 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'configurations.dart';
 import 'taggable.dart';
 
-///
+/// A widget that combines a text field provided by the `flutter_typeahead`
+/// library and a row of chips that represent the values chosen by the user.
 class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// Invoked any time values are added or removed.
   final ValueChanged<List<T>> onChanged;
 
-  /// The configuration of the [TextField] that the [FlutterTagging] widget displays.
+  /// The configuration of the [TextField] that the [FlutterTagging] widget
+  /// displays.
   final TextFieldConfiguration textFieldConfiguration;
 
   /// Called with the search pattern to get the search suggestions.
   ///
-  /// This callback must not be null. It is be called by the FlutterTagging widget
-  /// and provided with the search pattern. It should return a [List]
-  /// of suggestions either synchronously, or asynchronously (as the result of a
-  /// [Future].
-  /// Typically, the list of suggestions should not contain more than 4 or 5
-  /// entries. These entries will then be provided to [itemBuilder] to display
-  /// the suggestions.
-  ///
-  /// Example:
-  /// ```dart
-  /// findSuggestions: (pattern) async {
-  ///   return await _getSuggestions(pattern);
-  /// }
-  /// ```
+  /// This callback is be invoked indirectly by the `flutter_typeahead` widget.
+  /// It should return a [List] of suggestions either synchronously, or
+  /// asynchronously (as the result of a [Future]). Typically, the list of
+  /// suggestions should not contain more than 4 or 5 entries. These entries
+  /// will then be provided to [itemBuilder] to display the suggestions.
   final FutureOr<List<T>> Function(String) findSuggestions;
 
   /// The configuration of [Chip]s that are displayed for selected tags.
   final ChipConfiguration Function(T) configureChip;
 
-  /// The configuration of suggestions displayed when [findSuggestions] finishes.
+  /// The configuration of suggestions displayed when [findSuggestions]
+  /// finishes, used to populate the properties of a `ListTile` widget.
   final SuggestionConfiguration Function(T) configureSuggestion;
 
   /// The configuration of selected tags like their spacing, direction, etc.
@@ -67,7 +61,7 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// Called to display animations when [findSuggestions] returns suggestions.
   ///
   /// It is provided with the suggestions box instance and the animation
-  /// controller, and expected to return some animation that uses the controller
+  /// controller, and expected to return an animation that uses the controller
   /// to display the suggestion box.
   final Widget Function(BuildContext, Widget, AnimationController?)?
       transitionBuilder;
@@ -75,7 +69,7 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// The configuration of suggestion box.
   final SuggestionsBoxConfiguration suggestionsBoxConfiguration;
 
-  /// Spacing between the text field and the row of input chips.
+  /// Spacing between the text field and the row of chips.
   final double interiorSpacing;
 
   /// The duration that [transitionBuilder] animation takes.
@@ -95,28 +89,29 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   final double animationStart;
 
   /// If set to true, no loading box will be shown while suggestions are
-  /// being fetched. [loadingBuilder] will also be ignored.
+  /// being fetched. The [loadingBuilder] will also be ignored.
   ///
   /// Defaults to false.
   final bool hideOnLoading;
 
-  /// If set to true, nothing will be shown if there are no results.
+  /// If set to true, nothing will be shown if there are no results. The
   /// [emptyBuilder] will also be ignored.
   ///
   /// Defaults to false.
   final bool hideOnEmpty;
 
-  /// If set to true, nothing will be shown if there is an error.
+  /// If set to true, nothing will be shown if there is an error. The
   /// [errorBuilder] will also be ignored.
   ///
   /// Defaults to false.
   final bool hideOnError;
 
+  /// If defined, an invisible placeholder based on this item will occupy the
+  /// space where the row of chips would be when there are no values selected.
+  final T? placeholderItem;
+
   /// The duration to wait after the user stops typing before calling
   /// [findSuggestions].
-  ///
-  /// This is useful, because, if not set, a request for suggestions will be
-  /// sent for every character that the user types.
   ///
   /// This duration is set by default to 300 milliseconds.
   final Duration debounceDuration;
@@ -124,8 +119,8 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   /// If set to true, suggestions will be fetched immediately when the field is
   /// added to the view.
   ///
-  /// But the suggestions box will only be shown when the field receives focus.
-  /// To make the field receive focus immediately, you can set the `autofocus`
+  /// The suggestions box will only be shown when the field receives focus. To
+  /// make the field receive focus immediately, you can set the `autofocus`
   /// property in the [textFieldConfiguration] to true.
   ///
   /// Defaults to false.
@@ -147,6 +142,7 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
     this.errorBuilder,
     this.loadingBuilder,
     this.emptyBuilder,
+    this.placeholderItem,
     this.wrapConfiguration = const WrapConfiguration(),
     this.textFieldConfiguration = const TextFieldConfiguration(),
     this.suggestionsBoxConfiguration = const SuggestionsBoxConfiguration(),
@@ -304,33 +300,60 @@ class _FlutterTaggingState<T extends Taggable>
           direction: widget.wrapConfiguration.direction,
           textDirection: widget.wrapConfiguration.textDirection,
           verticalDirection: widget.wrapConfiguration.verticalDirection,
-          children: _values.map<Widget>((item) {
-            final conf = widget.configureChip(item);
-            return Chip(
-              label: conf.label,
-              shape: conf.shape,
-              avatar: conf.avatar,
-              backgroundColor: conf.backgroundColor,
-              clipBehavior: conf.clipBehavior,
-              deleteButtonTooltipMessage: conf.deleteButtonTooltipMessage,
-              deleteIcon: conf.deleteIcon,
-              deleteIconColor: conf.deleteIconColor,
-              elevation: conf.elevation,
-              labelPadding: conf.labelPadding,
-              labelStyle: conf.labelStyle,
-              materialTapTargetSize: conf.materialTapTargetSize,
-              padding: conf.padding,
-              shadowColor: conf.shadowColor,
-              onDeleted: () {
-                setState(() {
-                  _values.remove(item);
-                });
-                widget.onChanged.call(_values.toList(growable: false));
-              },
-            );
-          }).toList(),
+          children: _values.isEmpty && widget.placeholderItem != null
+              ? _buildPlaceholder(
+                  context,
+                  widget.configureChip(widget.placeholderItem!),
+                )
+              : _values.map<Widget>((item) {
+                  final conf = widget.configureChip(item);
+                  return Chip(
+                    label: conf.label,
+                    shape: conf.shape,
+                    avatar: conf.avatar,
+                    backgroundColor: conf.backgroundColor,
+                    clipBehavior: conf.clipBehavior,
+                    deleteButtonTooltipMessage: conf.deleteButtonTooltipMessage,
+                    deleteIcon: conf.deleteIcon,
+                    deleteIconColor: conf.deleteIconColor,
+                    elevation: conf.elevation,
+                    labelPadding: conf.labelPadding,
+                    labelStyle: conf.labelStyle,
+                    materialTapTargetSize: conf.materialTapTargetSize,
+                    padding: conf.padding,
+                    shadowColor: conf.shadowColor,
+                    onDeleted: () {
+                      setState(() {
+                        _values.remove(item);
+                      });
+                      widget.onChanged.call(_values.toList(growable: false));
+                    },
+                  );
+                }).toList(),
         ),
       ],
     );
   }
+}
+
+List<Widget> _buildPlaceholder(BuildContext context, ChipConfiguration conf) {
+  return [
+    Visibility(
+      visible: false,
+      maintainAnimation: true,
+      maintainSize: true,
+      maintainState: true,
+      child: Chip(
+        label: conf.label,
+        shape: conf.shape,
+        avatar: conf.avatar,
+        clipBehavior: conf.clipBehavior,
+        deleteIcon: conf.deleteIcon,
+        elevation: conf.elevation,
+        labelPadding: conf.labelPadding,
+        labelStyle: conf.labelStyle,
+        padding: conf.padding,
+      ),
+    )
+  ];
 }

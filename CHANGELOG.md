@@ -13,7 +13,8 @@ This file follows the convention described at
 * `onChanged()` now receives an immutable copy of the list of values.
 * `initialItems` is no longer modified in-place by the widget state.
 * Focus stays in text field after selecting or creating a value.
-* Added a small space between text field and input chips.
+* Added a small space between text field and row of chips.
+* Added optional `placeholderItem` to reserve space for row of chips.
 
 ## [4.0.1] - 2022-04-20
 * Flutter 3.0 fixes.
