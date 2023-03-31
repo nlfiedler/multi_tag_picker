@@ -26,6 +26,9 @@ This file follows the convention described at
 * BradInTheUSA: forked from https://github.com/culjo/flutter_tagging
 * culjo: forked from https://github.com/sarbagyastha/flutter_tagging
 
+## [3.0.0] - 2021-03-27
+* Null safety release
+
 ## [2.2.0+3] - 2020-02-23
 * Minor docs changes
 
