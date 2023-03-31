@@ -5,16 +5,19 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 This file follows the convention described at
 [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.0.0] - 2023-03-30
 **BREAKING CHANGES**
 ### Renamed from `flutter_tagging_plus` to `multi_tag_picker`.
 - Resetting the version number to `1.0.0` to reflect name change.
+### Added
+* Added optional `placeholderItem` to reserve space for row of chips.
 ### Changed
 * `onChanged()` now receives an immutable copy of the list of values.
 * `initialItems` is no longer modified in-place by the widget state.
 * Focus stays in text field after selecting or creating a value.
-* Added a small space between text field and row of chips.
-* Added optional `placeholderItem` to reserve space for row of chips.
+* Added a `SizedBox` of `interiorSpacing` height between text field and chips.
+### Removed
+* The `Taggable` abstract class and `TaggableMixin`; they do not belong in this library.
 
 ## [4.0.1] - 2022-04-20
 * Flutter 3.0 fixes.

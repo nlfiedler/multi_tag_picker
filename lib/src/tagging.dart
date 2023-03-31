@@ -7,11 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import 'configurations.dart';
-import 'taggable.dart';
 
 /// A widget that combines a text field provided by the `flutter_typeahead`
 /// library and a row of chips that represent the values chosen by the user.
-class FlutterTagging<T extends Taggable> extends StatefulWidget {
+///
+/// The type `T` should override the `==` operator as well as `hashCode` to
+/// provide suitable equality checks for the values, as they will be stored in a
+/// `Set` collection. The `equatable` library is helpful for this purpose. See
+/// the `Language` class in `example/lib/main.dart` for an example of
+/// implementing this functions.
+class FlutterTagging<T> extends StatefulWidget {
   /// Invoked any time values are added or removed.
   final ValueChanged<List<T>> onChanged;
 
@@ -161,8 +166,7 @@ class FlutterTagging<T extends Taggable> extends StatefulWidget {
   State<FlutterTagging<T>> createState() => _FlutterTaggingState<T>();
 }
 
-class _FlutterTaggingState<T extends Taggable>
-    extends State<FlutterTagging<T>> {
+class _FlutterTaggingState<T> extends State<FlutterTagging<T>> {
   late final TextEditingController _textController;
   late final FocusNode _focusNode;
   final Set<T> _values = <T>{};
@@ -303,6 +307,7 @@ class _FlutterTaggingState<T extends Taggable>
           children: _values.isEmpty && widget.placeholderItem != null
               ? _buildPlaceholder(
                   context,
+                  // ignore: null_check_on_nullable_type_parameter
                   widget.configureChip(widget.placeholderItem!),
                 )
               : _values.map<Widget>((item) {

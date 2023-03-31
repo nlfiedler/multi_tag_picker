@@ -129,13 +129,23 @@ Future<List<Language>> getLanguages(String query) async {
     Language(name: 'Rust', position: 1),
     Language(name: 'Dart', position: 2),
     Language(name: 'Scheme', position: 3),
+    Language(name: 'Swift', position: 4),
+    Language(name: 'Erlang', position: 5),
+    Language(name: 'Go', position: 6),
+    Language(name: 'F#', position: 7),
     Language(name: 'Java', position: 8),
     Language(name: 'C#', position: 9),
     Language(name: 'JavaScript', position: 10),
     Language(name: 'APL', position: 11),
     Language(name: 'Python', position: 12),
-    Language(name: 'C++', position: 24),
-    Language(name: 'PHP', position: 48),
+    Language(name: 'Haxe', position: 13),
+    Language(name: 'Io', position: 14),
+    Language(name: 'Lua', position: 15),
+    Language(name: 'OCaml', position: 16),
+    Language(name: 'C++', position: 17),
+    Language(name: 'Prolog', position: 18),
+    Language(name: 'TypeScript', position: 19),
+    Language(name: 'Zig', position: 20),
   ]
       .where((lang) => lang.name.toLowerCase().contains(lowercaseQuery))
       .toList(growable: false)
@@ -146,7 +156,10 @@ Future<List<Language>> getLanguages(String query) async {
 }
 
 /// Language represents a programming language.
-class Language extends Taggable {
+///
+/// Note that this class overrides the `==` operator and `hashCode` method in
+/// order to provide sensible equality with other values of the same type.
+class Language {
   final String name;
   final int position;
 
@@ -156,7 +169,19 @@ class Language extends Taggable {
   });
 
   @override
-  List<Object> get props => [name];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Language &&
+          runtimeType == other.runtimeType &&
+          name == other.name;
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  String toString() {
+    return name;
+  }
 
   String toJson() => '''  {
     "name": $name,\n
