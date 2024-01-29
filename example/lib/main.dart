@@ -49,10 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               findSuggestions: getLanguages,
               additionCallback: (value) {
-                return Language(
-                  name: value,
-                  position: 0,
-                );
+                return languageList.firstWhere(
+                    (e) => e.name.toLowerCase() == value.toLowerCase(),
+                    orElse: () => Language(
+                          name: value,
+                          position: 0,
+                        ));
               },
               configureSuggestion: (lang) {
                 return SuggestionConfiguration(
@@ -118,6 +120,29 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+const List<Language> languageList = [
+  Language(name: 'Rust', position: 1),
+  Language(name: 'Dart', position: 2),
+  Language(name: 'Scheme', position: 3),
+  Language(name: 'Swift', position: 4),
+  Language(name: 'Erlang', position: 5),
+  Language(name: 'Go', position: 6),
+  Language(name: 'F#', position: 7),
+  Language(name: 'Java', position: 8),
+  Language(name: 'C#', position: 9),
+  Language(name: 'JavaScript', position: 10),
+  Language(name: 'APL', position: 11),
+  Language(name: 'Python', position: 12),
+  Language(name: 'Haxe', position: 13),
+  Language(name: 'Io', position: 14),
+  Language(name: 'Lua', position: 15),
+  Language(name: 'OCaml', position: 16),
+  Language(name: 'C++', position: 17),
+  Language(name: 'Prolog', position: 18),
+  Language(name: 'TypeScript', position: 19),
+  Language(name: 'Zig', position: 20),
+];
+
 /// Mocks fetching language from network API with delay of 500ms.
 Future<List<Language>> getLanguages(String query) async {
   if (query.isEmpty) {
@@ -125,28 +150,7 @@ Future<List<Language>> getLanguages(String query) async {
   }
   await Future.delayed(const Duration(milliseconds: 500), null);
   final lowercaseQuery = query.toLowerCase();
-  return const <Language>[
-    Language(name: 'Rust', position: 1),
-    Language(name: 'Dart', position: 2),
-    Language(name: 'Scheme', position: 3),
-    Language(name: 'Swift', position: 4),
-    Language(name: 'Erlang', position: 5),
-    Language(name: 'Go', position: 6),
-    Language(name: 'F#', position: 7),
-    Language(name: 'Java', position: 8),
-    Language(name: 'C#', position: 9),
-    Language(name: 'JavaScript', position: 10),
-    Language(name: 'APL', position: 11),
-    Language(name: 'Python', position: 12),
-    Language(name: 'Haxe', position: 13),
-    Language(name: 'Io', position: 14),
-    Language(name: 'Lua', position: 15),
-    Language(name: 'OCaml', position: 16),
-    Language(name: 'C++', position: 17),
-    Language(name: 'Prolog', position: 18),
-    Language(name: 'TypeScript', position: 19),
-    Language(name: 'Zig', position: 20),
-  ]
+  return languageList
       .where((lang) => lang.name.toLowerCase().contains(lowercaseQuery))
       .toList(growable: false)
     ..sort((a, b) => a.name
